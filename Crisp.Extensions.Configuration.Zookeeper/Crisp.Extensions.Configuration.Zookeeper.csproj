@@ -1,7 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;net451</TargetFrameworks>
+    <Authors>nelson</Authors>
+    <Description>the configuration extensions that use zookeeper</Description>
+    <Copyright>Copyright 2017 (c) nelson. All rights reserved.</Copyright>
+    <PackageTags>zookeeper configuration</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\netstandard1.3\Crisp.Extensions.Configuration.Zookeeper.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
