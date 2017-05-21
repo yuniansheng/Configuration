@@ -28,14 +28,6 @@ namespace ConsoleApp
                 Console.WriteLine(item);
             }
 
-            //while ("quit" != Console.ReadLine())
-            //{
-            //    foreach (var item in configuration.AsEnumerable())
-            //    {
-            //        Console.WriteLine(item);
-            //    }
-            //}
-
             Console.ReadLine();
         }
     }
