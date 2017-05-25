@@ -7,7 +7,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
 {
     public static class ZookeeperConfigurationExtensions
     {
-        public static void UseZookeeper(this IConfigurationBuilder builder,
+        public static void AddZookeeper(this IConfigurationBuilder builder,
             string connectionString, string rootPath, int timeout)
         {
             if (builder == null)

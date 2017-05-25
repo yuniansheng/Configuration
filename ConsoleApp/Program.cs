@@ -11,7 +11,7 @@ namespace ConsoleApp
         static void Main(string[] args)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.UseZookeeper("localhost:2181", "/config", 3000);
+            builder.AddZookeeper("localhost:2181", "/config", 3000);
             var configuration = builder.Build();
             ChangeToken.OnChange(
                 () => configuration.GetReloadToken(),
