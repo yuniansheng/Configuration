@@ -32,7 +32,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         /// var configuration = builder.Build();
         /// var usdRate = configuration["Rate:USD"];    //6.35
         /// var hkdRate = configuration["Rate:HKD"];    //0.87
-        /// var hkdRate = configuration["AccountChangeNotificationMethod"];    //Email
+        /// var notifyMethod = configuration["AccountChangeNotificationMethod"];    //Email
         /// </code>
         /// 
         /// somebody else may response for the OrderApp,they can use this package like this:
