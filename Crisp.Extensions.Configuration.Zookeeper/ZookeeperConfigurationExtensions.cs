@@ -72,5 +72,12 @@ namespace Crisp.Extensions.Configuration.Zookeeper
             };
             builder.Add(source);
         }
+
+        [Obsolete(@"use AddZookeeper instead,this method will be removed in future,
+i just think the name AddZookeeper is more close to the naming style 
+in orther configuration providers,such as AddJsonFile,AddEnvironment")]
+        public static void UseZookeeper(this IConfigurationBuilder builder,
+            string connectionString, string rootPath, int timeout)
+            => AddZookeeper(builder, connectionString, rootPath, timeout);
     }
 }
