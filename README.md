@@ -9,7 +9,7 @@ assume you have these nodes in zookeeper
 
 ```
 IConfigurationBuilder builder = new ConfigurationBuilder();
-builder.AddZookeeper("localhost:2181", "/config", 3000);
+builder.AddZookeeper("localhost:2181", "/AccountApp", 3000);
 var configuration = builder.Build();
 
 var usdRate = configuration["Rate:USD"];    //6.35
