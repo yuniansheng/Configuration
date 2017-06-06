@@ -8,9 +8,19 @@ namespace Crisp.Extensions.Configuration.Zookeeper
     {
         public event Func<WatchedEvent, Task> NodeChanged;
 
+        public event Func<WatchedEvent, Task> StateChanged;
+
         public async override Task process(WatchedEvent @event)
         {
-            NodeChanged?.Invoke(@event);
+            var path = @event.getPath();
+            if (path == null)
+            {
+                StateChanged?.Invoke(@event);
+            }
+            else
+            {
+                NodeChanged?.Invoke(@event);
+            }
         }
     }
 }

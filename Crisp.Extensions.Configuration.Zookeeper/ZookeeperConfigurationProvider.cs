@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using zk = org.apache.zookeeper;
 
@@ -8,21 +11,44 @@ namespace Crisp.Extensions.Configuration.Zookeeper
     public class ZookeeperConfigurationProvider : ConfigurationProvider
     {
         private zk.ZooKeeper _zk;
-        private NodeWatcher _watcher;
+        private AutoResetEvent _connectedEvent;
+        private AutoResetEvent _loadCompletedEvent;
 
         public ZookeeperConfigurationSource Source { get; }
 
         public ZookeeperConfigurationProvider(ZookeeperConfigurationSource source)
         {
             Source = source;
-            _zk = new zk.ZooKeeper(Source.ConnectionString, Source.SessionTimeout, null);
-            _watcher = new NodeWatcher();
-            _watcher.NodeChanged += OnNodeChanged;
+            _zk = CreateZookeeper();
+            _connectedEvent = new AutoResetEvent(false);
+            _loadCompletedEvent = new AutoResetEvent(false);
         }
 
         public override void Load()
         {
-            LoadPath(Source.RootPath).Wait();
+            var isConnected = _connectedEvent.WaitOne(Source.SessionTimeout);
+            if (!isConnected)
+            {
+                throw new Exception("connect to zookeeper timeout");
+            }
+            _loadCompletedEvent.WaitOne();
+        }
+
+        private async Task OnStateChanged(zk.WatchedEvent arg)
+        {
+            var state = arg.getState();
+            Console.WriteLine(state);
+            if (state == zk.Watcher.Event.KeeperState.SyncConnected)
+            {
+                _connectedEvent.Set();
+                await ReloadData();
+                _loadCompletedEvent.Set();
+                OnReload();
+            }
+            else if (state == zk.Watcher.Event.KeeperState.Expired)
+            {
+                _zk = CreateZookeeper();
+            }
         }
 
         private async Task OnNodeChanged(zk.WatchedEvent arg)
@@ -36,11 +62,11 @@ namespace Crisp.Extensions.Configuration.Zookeeper
                     OnReload();
                     break;
                 case zk.Watcher.Event.EventType.NodeDataChanged:
-                    await LoadPathData(path);
+                    await OnNodeDataChanged(path);
                     OnReload();
                     break;
                 case zk.Watcher.Event.EventType.NodeChildrenChanged:
-                    await LoadPath(path);
+                    await OnNodeChildrenChanged(path);
                     OnReload();
                     break;
                 default:
@@ -48,27 +74,67 @@ namespace Crisp.Extensions.Configuration.Zookeeper
             }
         }
 
-        private async Task LoadPath(string path)
+        private async Task OnNodeDataChanged(string path)
         {
-            if (path != Source.RootPath)
-            {
-                await LoadPathData(path);
-            }
+            var pair = await GetPathData(path);
+            Data[pair.Key] = pair.Value;
+        }
 
-            var children = await _zk.getChildrenAsync(path, _watcher);
+        private async Task OnNodeChildrenChanged(string path)
+        {
+            var children = await _zk.getChildrenAsync(path, watch: true);
             if (children != null)
             {
                 foreach (var childPath in children.Children)
                 {
-                    await LoadPath(path + "/" + childPath);
+                    var pair = await GetPathData(path + "/" + childPath);
+                    Data[pair.Key] = pair.Value;
                 }
             }
         }
 
-        private async Task LoadPathData(string path)
+
+        private async Task ReloadData()
         {
-            var node = await _zk.getDataAsync(path, _watcher);
-            Data[ToKey(path)] = ToString(node.Data);
+            var kvList = new List<KeyValuePair<string, string>>();
+            await RecursiveLoadPath(kvList, Source.RootPath);
+            lock (Data)
+            {
+                Data.Clear();
+                kvList.ForEach(item => Data.Add(item));
+            }
+        }
+
+        private async Task RecursiveLoadPath(List<KeyValuePair<string, string>> kvList, string path)
+        {
+            if (path != Source.RootPath)
+            {
+                var pair = await GetPathData(path);
+                kvList.Add(pair);
+            }
+
+            var children = await _zk.getChildrenAsync(path, watch: true);
+            if (children != null)
+            {
+                foreach (var childPath in children.Children)
+                {
+                    await RecursiveLoadPath(kvList, path + "/" + childPath);
+                }
+            }
+        }
+
+        private async Task<KeyValuePair<string, string>> GetPathData(string path)
+        {
+            var node = await _zk.getDataAsync(path, watch: true);
+            return new KeyValuePair<string, string>(ToKey(path), ToString(node.Data));
+        }
+
+        private zk.ZooKeeper CreateZookeeper()
+        {
+            var watcher = new NodeWatcher();
+            watcher.NodeChanged += OnNodeChanged;
+            watcher.StateChanged += OnStateChanged;
+            return new zk.ZooKeeper(Source.ConnectionString, Source.SessionTimeout, watcher);
         }
 
         private string ToString(byte[] data)
