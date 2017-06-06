@@ -11,7 +11,13 @@ namespace ConsoleApp
         static void Main(string[] args)
         {
             IConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddZookeeper("localhost:2181", "/config", 3000);
+            builder.AddZookeeper(option =>
+            {
+                option.ConnectionString = "localhost:2181";
+                option.ConnectionTimeout = 10000;
+                option.RootPath = "/config";
+                option.SessionTimeout = 3000;
+            });
             var configuration = builder.Build();
             ChangeToken.OnChange(
                 () => configuration.GetReloadToken(),
@@ -22,11 +28,6 @@ namespace ConsoleApp
                         Console.WriteLine(item);
                     }
                 });
-
-            foreach (var item in configuration.AsEnumerable())
-            {
-                Console.WriteLine(item);
-            }
 
             Console.ReadLine();
         }

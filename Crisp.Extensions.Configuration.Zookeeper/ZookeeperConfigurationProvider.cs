@@ -11,14 +11,13 @@ namespace Crisp.Extensions.Configuration.Zookeeper
     public class ZookeeperConfigurationProvider : ConfigurationProvider
     {
         private zk.ZooKeeper _zk;
+        private ZookeeperOption _option;
         private AutoResetEvent _connectedEvent;
         private AutoResetEvent _loadCompletedEvent;
 
-        public ZookeeperConfigurationSource Source { get; }
-
         public ZookeeperConfigurationProvider(ZookeeperConfigurationSource source)
         {
-            Source = source;
+            _option = source.Option;
             _zk = CreateZookeeper();
             _connectedEvent = new AutoResetEvent(false);
             _loadCompletedEvent = new AutoResetEvent(false);
@@ -26,7 +25,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
 
         public override void Load()
         {
-            var isConnected = _connectedEvent.WaitOne(Source.SessionTimeout);
+            var isConnected = _connectedEvent.WaitOne(_option.ConnectionTimeout);
             if (!isConnected)
             {
                 throw new Exception("connect to zookeeper timeout");
@@ -97,7 +96,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         private async Task ReloadData()
         {
             var kvList = new List<KeyValuePair<string, string>>();
-            await RecursiveLoadPath(kvList, Source.RootPath);
+            await RecursiveLoadPath(kvList, _option.RootPath);
             lock (Data)
             {
                 Data.Clear();
@@ -107,7 +106,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
 
         private async Task RecursiveLoadPath(List<KeyValuePair<string, string>> kvList, string path)
         {
-            if (path != Source.RootPath)
+            if (path != _option.RootPath)
             {
                 var pair = await GetPathData(path);
                 kvList.Add(pair);
@@ -134,7 +133,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
             var watcher = new NodeWatcher();
             watcher.NodeChanged += OnNodeChanged;
             watcher.StateChanged += OnStateChanged;
-            return new zk.ZooKeeper(Source.ConnectionString, Source.SessionTimeout, watcher);
+            return new zk.ZooKeeper(_option.ConnectionString, _option.SessionTimeout, watcher);
         }
 
         private string ToString(byte[] data)
@@ -144,7 +143,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
 
         private string ToKey(string path)
         {
-            return path.Substring(Source.RootPath.Length + 1).Replace("/", ConfigurationPath.KeyDelimiter);
+            return path.Substring(_option.RootPath.Length + 1).Replace("/", ConfigurationPath.KeyDelimiter);
         }
     }
 }

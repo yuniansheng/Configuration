@@ -16,42 +16,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         /// <param name="builder">ConfigurationBuilder</param>
         /// <param name="connectionString">the zookeeper connection string</param>
         /// <param name="rootPath">the zookeeper node path which you want to read it's sub node as key-value</param>
-        /// <param name="timeout">zookeeper connection timeout in millsecond</param>
-        /// <remarks>
-        /// for example:
-        /// you have these nodes in zookeeper
-        /// 
-        /// /AccountApp/Rate/USD=6.35
-        /// /AccountApp/Rate/HKD=0.87
-        /// /AccountApp/AccountChangeNotificationMethod=Email
-        /// /OrderApp/Payment/Timeout=30
-        /// 
-        /// if you are develop the AccountApp,you may use this package like this:
-        /// <code>
-        /// builder.AddZookeeper("localhost:2181", "/AccountApp", 3000);
-        /// var configuration = builder.Build();
-        /// var usdRate = configuration["Rate:USD"];    //6.35
-        /// var hkdRate = configuration["Rate:HKD"];    //0.87
-        /// var notifyMethod = configuration["AccountChangeNotificationMethod"];    //Email
-        /// </code>
-        /// 
-        /// somebody else may response for the OrderApp,they can use this package like this:
-        /// <code>
-        /// builder.AddZookeeper("localhost:2181", "/OrderApp", 3000);
-        /// var configuration = builder.Build();
-        /// var paymentTimeoutMinutes = configuration["Payment:Timeout"];    //30
-        /// </code>
-        /// 
-        /// as you see,the configuration key is the whole node path in zookeeper subtract the value of 
-        /// {rootPath} paramteter,and the path dlimiter "/" in zookeeper will be replace with
-        /// Microsoft.Extensions.Configuration.ConfigurationPath.KeyDelimiter( default is ":")
-        /// you can also add multi zookeeper source,just like this:
-        /// <code>
-        /// builder
-        ///     .AddZookeeper("localhost:2181", "/AccountApp", 3000)
-        ///     .AddZookeeper("localhost:2181", "/OrderApp", 3000);
-        /// </code>
-        /// </remarks>
+        /// <param name="timeout">zookeeper session timeout in millsecond</param>       
         public static void AddZookeeper(this IConfigurationBuilder builder,
             string connectionString, string rootPath, int timeout)
         {
@@ -63,21 +28,34 @@ namespace Crisp.Extensions.Configuration.Zookeeper
             {
                 throw new ArgumentNullException(nameof(connectionString));
             }
-
-            var source = new ZookeeperConfigurationSource()
+            if (string.IsNullOrEmpty(rootPath))
             {
-                ConnectionString = connectionString,
-                RootPath = rootPath,
-                SessionTimeout = timeout
-            };
+                throw new ArgumentNullException(nameof(rootPath));
+            }
+
+            var option = ZookeeperOption.Default;
+            option.ConnectionString = connectionString;
+            option.RootPath = rootPath;
+            option.SessionTimeout = timeout;
+            var source = new ZookeeperConfigurationSource() { Option = option };
             builder.Add(source);
         }
 
-        [Obsolete(@"use AddZookeeper instead,this method will be removed in future,
-i just think the name AddZookeeper is more close to the naming style 
-in orther configuration providers,such as AddJsonFile,AddEnvironment")]
-        public static void UseZookeeper(this IConfigurationBuilder builder,
-            string connectionString, string rootPath, int timeout)
-            => AddZookeeper(builder, connectionString, rootPath, timeout);
+        public static void AddZookeeper(this IConfigurationBuilder builder, Action<ZookeeperOption> config)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config));
+            }
+            var option = ZookeeperOption.Default;
+            config(option);
+
+            var source = new ZookeeperConfigurationSource() { Option = option };
+            builder.Add(source);
+        }
     }
 }
