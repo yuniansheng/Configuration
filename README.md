@@ -3,16 +3,14 @@
 
 # Usage
 install the nuget package  
-```
-Install-Package Crisp.Extensions.Configuration.Zookeeper
-```
+```Install-Package Crisp.Extensions.Configuration.Zookeeper```
 
 assume you have these nodes in zookeeper  
 /AccountApp/Rate/USD = 6.35  
 /AccountApp/Rate/HKD = 0.87  
 /AccountApp/AccountChangeNotificationMethod = Email  
 
-```
+```C#
 IConfigurationBuilder builder = new ConfigurationBuilder();
 builder.AddZookeeper(option =>
 {
