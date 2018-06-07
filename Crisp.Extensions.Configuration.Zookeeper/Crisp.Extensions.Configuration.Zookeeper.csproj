@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;net451</TargetFrameworks>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <Authors>nelson</Authors>
     <Description>the configuration provider that use zookeeper</Description>
     <Copyright>Copyright 2017 (c) nelson. All rights reserved.</Copyright>
