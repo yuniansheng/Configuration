@@ -8,6 +8,9 @@ using zk = org.apache.zookeeper;
 
 namespace Crisp.Extensions.Configuration.Zookeeper
 {
+    /// <summary>
+    /// A zookeeper based <see cref="ConfigurationProvider"/>.
+    /// </summary>
     public class ZookeeperConfigurationProvider : ConfigurationProvider
     {
         private zk.ZooKeeper _zk;
@@ -15,6 +18,11 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         private AutoResetEvent _connectedEvent;
         private AutoResetEvent _loadCompletedEvent;
 
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="source">The source settings.</param>
+        [Obsolete]
         public ZookeeperConfigurationProvider(ZookeeperConfigurationSource source)
         {
             _option = source.Option;
@@ -23,6 +31,21 @@ namespace Crisp.Extensions.Configuration.Zookeeper
             _loadCompletedEvent = new AutoResetEvent(false);
         }
 
+        /// <summary>
+        /// Initializes a new instance.
+        /// </summary>
+        /// <param name="option">the zookeeper option.</param>
+        public ZookeeperConfigurationProvider(ZookeeperOption option)
+        {
+            _option = option;
+            _zk = CreateZookeeper();
+            _connectedEvent = new AutoResetEvent(false);
+            _loadCompletedEvent = new AutoResetEvent(false);
+        }
+
+        /// <summary>
+        /// Loads the configuration data from zookeeper.
+        /// </summary>
         public override void Load()
         {
             var isConnected = _connectedEvent.WaitOne(_option.ConnectionTimeout);

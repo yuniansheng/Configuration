@@ -6,7 +6,7 @@ using System.Text;
 namespace Crisp.Extensions.Configuration.Zookeeper
 {
     /// <summary>
-    /// zookeeper configuration provider extensions
+    /// Extension methods for adding <see cref="ZookeeperConfigurationProvider"/>.
     /// </summary>
     public static class ZookeeperConfigurationExtensions
     {
@@ -33,26 +33,28 @@ namespace Crisp.Extensions.Configuration.Zookeeper
                 throw new ArgumentNullException(nameof(rootPath));
             }
 
-            var option = ZookeeperOption.Default;
-            option.ConnectionString = connectionString;
-            option.RootPath = rootPath;
-            option.SessionTimeout = timeout;
-            var source = new ZookeeperConfigurationSource() { Option = option };
-            builder.Add(source);
+            builder.AddZookeeper(option =>
+            {
+                option.ConnectionString = connectionString;
+                option.RootPath = rootPath;
+                option.SessionTimeout = timeout;
+            });
         }
 
+        /// <summary>
+        /// Adds a zookeeper configuration source.
+        /// </summary>
+        /// <param name="builder">The <see cref="IConfigurationBuilder"/> to add to.</param>
+        /// <param name="config">configures the zookeeper optoin</param>
         public static void AddZookeeper(this IConfigurationBuilder builder, Action<ZookeeperOption> config)
         {
             if (builder == null)
             {
                 throw new ArgumentNullException(nameof(builder));
             }
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
+
             var option = ZookeeperOption.Default;
-            config(option);
+            config?.Invoke(option);
 
             var source = new ZookeeperConfigurationSource() { Option = option };
             builder.Add(source);
