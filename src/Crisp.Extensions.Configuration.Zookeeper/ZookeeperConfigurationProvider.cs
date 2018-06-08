@@ -13,10 +13,8 @@ namespace Crisp.Extensions.Configuration.Zookeeper
     /// </summary>
     public class ZookeeperConfigurationProvider : ConfigurationProvider
     {
-        private zk.ZooKeeper _zk;
         private ZookeeperOption _option;
-        private AutoResetEvent _connectedEvent;
-        private AutoResetEvent _loadCompletedEvent;
+        private ZookeeperClient _client;
 
         /// <summary>
         /// Initializes a new instance.
@@ -26,9 +24,6 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         public ZookeeperConfigurationProvider(ZookeeperConfigurationSource source)
         {
             _option = source.Option;
-            _zk = CreateZookeeper();
-            _connectedEvent = new AutoResetEvent(false);
-            _loadCompletedEvent = new AutoResetEvent(false);
         }
 
         /// <summary>
@@ -38,9 +33,13 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         public ZookeeperConfigurationProvider(ZookeeperOption option)
         {
             _option = option;
-            _zk = CreateZookeeper();
-            _connectedEvent = new AutoResetEvent(false);
-            _loadCompletedEvent = new AutoResetEvent(false);
+        }
+
+        public ZookeeperConfigurationProvider(ZookeeperClient client)
+        {
+            _client = client;
+            _client.SyncConnected += LoadAsync;
+            _client.NodeChanged += OnNodeChanged;
         }
 
         /// <summary>
@@ -48,29 +47,19 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         /// </summary>
         public override void Load()
         {
-            var isConnected = _connectedEvent.WaitOne(_option.ConnectionTimeout);
+            var isConnected = _client.WaitConnected(_option.ConnectionTimeout);
             if (!isConnected)
             {
                 throw new Exception("connect to zookeeper timeout");
             }
-            _loadCompletedEvent.WaitOne();
+            LoadAsync().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private async Task OnStateChanged(zk.WatchedEvent arg)
+        private async Task LoadAsync()
         {
-            var state = arg.getState();
-            Console.WriteLine(state);
-            if (state == zk.Watcher.Event.KeeperState.SyncConnected)
-            {
-                _connectedEvent.Set();
-                await ReloadData();
-                _loadCompletedEvent.Set();
-                OnReload();
-            }
-            else if (state == zk.Watcher.Event.KeeperState.Expired)
-            {
-                _zk = CreateZookeeper();
-            }
+            var data = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            await RecursiveLoadPath(data, _option.RootPath);
+            Data = data;
         }
 
         private async Task OnNodeChanged(zk.WatchedEvent arg)
@@ -80,7 +69,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
             switch (type)
             {
                 case zk.Watcher.Event.EventType.NodeDeleted:
-                    Data.Remove(ToKey(path));
+                    Data.Remove(path);
                     OnReload();
                     break;
                 case zk.Watcher.Event.EventType.NodeDataChanged:
@@ -98,75 +87,30 @@ namespace Crisp.Extensions.Configuration.Zookeeper
 
         private async Task OnNodeDataChanged(string path)
         {
-            var pair = await GetPathData(path);
-            Data[pair.Key] = pair.Value;
+            Data[path] = await _client.GetDataAsync(path);
         }
 
         private async Task OnNodeChildrenChanged(string path)
         {
-            var children = await _zk.getChildrenAsync(path, watch: true);
-            if (children != null)
+            var children = await _client.GetChildrenAsync(path);
+            foreach (var childPath in children)
             {
-                foreach (var childPath in children.Children)
-                {
-                    var pair = await GetPathData(path + "/" + childPath);
-                    Data[pair.Key] = pair.Value;
-                }
+                Data[path] = await _client.GetDataAsync(path + "/" + childPath);
             }
         }
 
-
-        private async Task ReloadData()
-        {
-            var kvList = new List<KeyValuePair<string, string>>();
-            await RecursiveLoadPath(kvList, _option.RootPath);
-            lock (Data)
-            {
-                Data.Clear();
-                kvList.ForEach(item => Data.Add(item));
-            }
-        }
-
-        private async Task RecursiveLoadPath(List<KeyValuePair<string, string>> kvList, string path)
+        private async Task RecursiveLoadPath(IDictionary<string, string> data, string path)
         {
             if (path != _option.RootPath)
             {
-                var pair = await GetPathData(path);
-                kvList.Add(pair);
+                data[path] = await _client.GetDataAsync(path);
             }
 
-            var children = await _zk.getChildrenAsync(path, watch: true);
-            if (children != null)
+            var children = await _client.GetChildrenAsync(path);
+            foreach (var childPath in children)
             {
-                foreach (var childPath in children.Children)
-                {
-                    await RecursiveLoadPath(kvList, path + "/" + childPath);
-                }
+                await RecursiveLoadPath(data, path + "/" + childPath);
             }
-        }
-
-        private async Task<KeyValuePair<string, string>> GetPathData(string path)
-        {
-            var node = await _zk.getDataAsync(path, watch: true);
-            return new KeyValuePair<string, string>(ToKey(path), ToString(node.Data));
-        }
-
-        private zk.ZooKeeper CreateZookeeper()
-        {
-            var watcher = new NodeWatcher();
-            watcher.NodeChanged += OnNodeChanged;
-            watcher.StateChanged += OnStateChanged;
-            return new zk.ZooKeeper(_option.ConnectionString, _option.SessionTimeout, watcher);
-        }
-
-        private string ToString(byte[] data)
-        {
-            return Encoding.UTF8.GetString(data);
-        }
-
-        private string ToKey(string path)
-        {
-            return path.Substring(_option.RootPath.Length + 1).Replace("/", ConfigurationPath.KeyDelimiter);
         }
     }
 }

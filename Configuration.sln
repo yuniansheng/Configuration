@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crisp.Extensions.Configurat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "samples\ConsoleApp\ConsoleApp.csproj", "{0AB49C68-96A1-436E-8580-2D4BDE9F217C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crisp.Extensions.Configuration.Zookeeper.Test", "test\Crisp.Extensions.Configuration.Zookeeper.Test\Crisp.Extensions.Configuration.Zookeeper.Test.csproj", "{DB924E3C-66F1-40F5-BE26-D4E58F846A35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB924E3C-66F1-40F5-BE26-D4E58F846A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB924E3C-66F1-40F5-BE26-D4E58F846A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB924E3C-66F1-40F5-BE26-D4E58F846A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB924E3C-66F1-40F5-BE26-D4E58F846A35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -34,6 +40,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{55A5DB6E-1F7C-40E7-90AD-911527451898} = {80170A0A-2548-4885-B7F8-6F03F969CA91}
 		{0AB49C68-96A1-436E-8580-2D4BDE9F217C} = {72296562-1C89-48F3-80B9-F48B5B7A5CE5}
+		{DB924E3C-66F1-40F5-BE26-D4E58F846A35} = {C9BD0E24-5FE6-4656-8DC3-55D3BAE8F5CC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0E4F866-53B0-4C7C-B230-E93B4C62445F}
