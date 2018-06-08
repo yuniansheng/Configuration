@@ -5,8 +5,4 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Crisp.Extensions.Configuration.Zookeeper\Crisp.Extensions.Configuration.Zookeeper.csproj" />
-  </ItemGroup>
-
 </Project>

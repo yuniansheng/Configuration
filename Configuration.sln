@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crisp.Extensions.Configuration.Zookeeper", "Crisp.Extensions.Configuration.Zookeeper\Crisp.Extensions.Configuration.Zookeeper.csproj", "{40342C05-4418-4D30-8C06-9CEDCC859789}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{80170A0A-2548-4885-B7F8-6F03F969CA91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{666DE8FB-FDC6-455D-85B9-D3AD30EE4BE9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C9BD0E24-5FE6-4656-8DC3-55D3BAE8F5CC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{72296562-1C89-48F3-80B9-F48B5B7A5CE5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Crisp.Extensions.Configuration.Zookeeper", "src\Crisp.Extensions.Configuration.Zookeeper\Crisp.Extensions.Configuration.Zookeeper.csproj", "{55A5DB6E-1F7C-40E7-90AD-911527451898}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "samples\ConsoleApp\ConsoleApp.csproj", "{0AB49C68-96A1-436E-8580-2D4BDE9F217C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,17 +19,21 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{40342C05-4418-4D30-8C06-9CEDCC859789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40342C05-4418-4D30-8C06-9CEDCC859789}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40342C05-4418-4D30-8C06-9CEDCC859789}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40342C05-4418-4D30-8C06-9CEDCC859789}.Release|Any CPU.Build.0 = Release|Any CPU
-		{666DE8FB-FDC6-455D-85B9-D3AD30EE4BE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{666DE8FB-FDC6-455D-85B9-D3AD30EE4BE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{666DE8FB-FDC6-455D-85B9-D3AD30EE4BE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{666DE8FB-FDC6-455D-85B9-D3AD30EE4BE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55A5DB6E-1F7C-40E7-90AD-911527451898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55A5DB6E-1F7C-40E7-90AD-911527451898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55A5DB6E-1F7C-40E7-90AD-911527451898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55A5DB6E-1F7C-40E7-90AD-911527451898}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AB49C68-96A1-436E-8580-2D4BDE9F217C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{55A5DB6E-1F7C-40E7-90AD-911527451898} = {80170A0A-2548-4885-B7F8-6F03F969CA91}
+		{0AB49C68-96A1-436E-8580-2D4BDE9F217C} = {72296562-1C89-48F3-80B9-F48B5B7A5CE5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0E4F866-53B0-4C7C-B230-E93B4C62445F}
