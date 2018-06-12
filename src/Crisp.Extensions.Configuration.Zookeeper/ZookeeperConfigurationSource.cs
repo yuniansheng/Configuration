@@ -19,7 +19,7 @@ namespace Crisp.Extensions.Configuration.Zookeeper
         /// <returns>A <see cref="ZookeeperConfigurationProvider"/></returns>
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new ZookeeperConfigurationProvider(Option);
+            return new ZookeeperConfigurationProvider(Option, new DefaultZooKeeperFactory());
         }
     }
 }
